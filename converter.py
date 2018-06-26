@@ -1,3 +1,4 @@
+
 def deleteUnnecessaryData(data):
     for num in range(0, len(data)):
         del data[num][1:3]
@@ -10,7 +11,7 @@ def save_file(data, name):
         num = num + 1        
     file.close() 
 
-def getFirst200OfCategory():
+def readCSV():
     file = open("book32listing.csv", "r") 
     book = file.readlines() 
     fileList = []
@@ -18,7 +19,9 @@ def getFirst200OfCategory():
     for x in range(0, len(book)):
         lineList = book[x].split(",")
         fileList.append(lineList)
+    return fileList
 
+def getFirst200OfCategory(data):
     categoryList = []
     officialList = []
     x = 0
@@ -46,11 +49,33 @@ def getFirst200OfCategory():
         x = x + 1    
 
     return officialList
-bookList = getFirst200OfCategory()
+
+
+bookList = readCSV()
 deleteUnnecessaryData(bookList)
 save_file(bookList, "officialBookList")
 
-    
+import pymysql
 
-# "Amazon Index","Filename","Image","Title","Author","Category ID","Category"
-# 0                 1         2        3      4          5
+
+for x in range(0, len(bookList)):
+    bid = bookList[x][0]
+    title = bookList[x][1]
+    author = bookList[x][2] 
+    category = bookList[x][-1]
+    connectionObject = pymysql.connect(host='localhost',
+                                user='root',
+                                password='tomhiddleston',
+                                db='library',
+                                charset='utf8mb4',
+                                cursorclass=pymysql.cursors.DictCursor)
+
+    try:
+        cursorObject= connectionObject.cursor()                                     
+        cursorObject.execute("""INSERT INTO book(bid, title, author, category) VALUES (%s,%s,%s, %s)""", (bid, title, author, category))
+    except Exception as e:
+        print("Exeception occured:{}".format(e))
+    finally:
+        connectionObject.close()
+
+    print(str(x) +" Done!")
