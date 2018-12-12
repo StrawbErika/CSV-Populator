@@ -1,7 +1,7 @@
 
 def deleteUnnecessaryData(data):
     for num in range(0, len(data)):
-        del data[num][1:3]
+        del data[num][1]
 
 def save_file(data, name):
     file = open(name + ".txt","w") 
@@ -60,22 +60,26 @@ import pymysql
 
 for x in range(0, len(bookList)):
     bid = bookList[x][0]
-    title = bookList[x][1]
-    author = bookList[x][2] 
+    image = bookList[x][1]
+    title = bookList[x][2]
+    author = bookList[x][3] 
     category = bookList[x][-1]
     connectionObject = pymysql.connect(host='localhost',
                                 user='root',
                                 password='tomhiddleston',
                                 db='library',
                                 charset='utf8mb4',
+                                autocommit=True,
                                 cursorclass=pymysql.cursors.DictCursor)
 
     try:
         cursorObject= connectionObject.cursor()                                     
-        cursorObject.execute("""INSERT INTO book(bid, title, author, category) VALUES (%s,%s,%s, %s)""", (bid, title, author, category))
+        cursorObject.execute("""INSERT INTO book(bid, img, title, author, category) VALUES (%s,%s,%s,%s,%s)""", (bid, image, title, author, category))
     except Exception as e:
         print("Exeception occured:{}".format(e))
     finally:
         connectionObject.close()
-
+    connectionObject
     print(str(x) +" Done!")
+
+ 
